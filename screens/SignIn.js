@@ -4,13 +4,15 @@ import {
   Text,
   TextInput,
   KeyboardAvoidingView,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { signIn } from "../API/firebaseMethods";
 import { AppContext } from "../components/appContext";
 import validateEmail from "../helpers/validateEmail";
 
 import styles from "../styled/global";
+
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 
 export default function SignIn({ route, navigation }) {
   const { siteDetails } = useContext(AppContext);
@@ -37,6 +39,7 @@ export default function SignIn({ route, navigation }) {
         setPasswordError("Password is required");
         setPassword("");
       } else {
+        console.log("auth in handle press: ", auth);
         signIn(email, password, auth)
           .then((msg) => {
             switch (msg) {
@@ -118,64 +121,56 @@ export default function SignIn({ route, navigation }) {
 
   return (
     <>
-      <View
-        style={[styles.container, { backgroundColor: "transparent" }]}
-      >
+      <View style={[styles.container, { backgroundColor: "transparent" }]}>
         <View style={styles.signInContainer}>
-
-            <>
-              <KeyboardAvoidingView
-                keyboardVerticalOffset={0}
-                behavior={"position"}
-              >
-                <TextInput
-                  style={styles.formInput}
-                  placeholder="Enter your email"
-                  value={email}
-                  onChangeText={(email) => handleChange(email, "email")}
-                  autoCapitalize="none"
-                  onFocus={() => setTheCurrentInput(email, "text")}
-                  onBlur={() => setTheCurrentInput(null, null)}
-                />
-                <Text style={styles.formError}>{emailError}</Text>
-                <TextInput
-                  style={styles.formInput}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChangeText={(password) =>
-                    handleChange(password, "password")
-                  }
-                  secureTextEntry={true}
-                  onFocus={() => setTheCurrentInput(password, "password")}
-                  onBlur={() => setTheCurrentInput("", "")}
-                />
-                <View style={{ padding: 12 }}>
-                  <Text style={styles.formError}>{passwordError}</Text>
-                </View>
-              </KeyboardAvoidingView>
-              <TouchableOpacity
-                onPress={() => handlePress()}
-                style={
-                  readyToSubmit ? styles.button : styles.buttonInactive
-                }
-              >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    readyToSubmit ? styles.readyToSubmit : {},
-                  ]}
-                >
-                  Login
-                </Text>
-              </TouchableOpacity>
+          <>
+            <KeyboardAvoidingView
+              keyboardVerticalOffset={0}
+              behavior={"position"}
+            >
+              <TextInput
+                style={styles.formInput}
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={(email) => handleChange(email, "email")}
+                autoCapitalize="none"
+                onFocus={() => setTheCurrentInput(email, "text")}
+                onBlur={() => setTheCurrentInput(null, null)}
+              />
+              <Text style={styles.formError}>{emailError}</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={(password) => handleChange(password, "password")}
+                secureTextEntry={true}
+                onFocus={() => setTheCurrentInput(password, "password")}
+                onBlur={() => setTheCurrentInput("", "")}
+              />
+              <View style={{ padding: 12 }}>
+                <Text style={styles.formError}>{passwordError}</Text>
+              </View>
+            </KeyboardAvoidingView>
+            <TouchableOpacity
+              onPress={() => handlePress()}
+              style={readyToSubmit ? styles.button : styles.buttonInactive}
+            >
               <Text
-                style={styles.forgotPassword}
-                onPress={() => navigation.navigate("Forgot Password")}
+                style={[
+                  styles.buttonText,
+                  readyToSubmit ? styles.readyToSubmit : {},
+                ]}
               >
-                Forgot Password?
+                Login
               </Text>
-            </>
-         
+            </TouchableOpacity>
+            <Text
+              style={styles.forgotPassword}
+              onPress={() => navigation.navigate("Forgot Password")}
+            >
+              Forgot Password?
+            </Text>
+          </>
         </View>
       </View>
     </>

@@ -1,54 +1,62 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useContext } from "react";
 import { View, Text, Alert } from "react-native";
 import { AppContext } from "../components/appContext";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
 
 export default function Home({ navigation }) {
-    const { guest, newUser, siteDetails } = useContext(AppContext);
-    const [siteContext] = siteDetails;
-    const { db, auth } = siteContext;
+  const { guest, newUser, siteDetails } = useContext(AppContext);
+  const [siteContext] = siteDetails;
+  const { db, auth } = siteContext;
 
-    const [newUserContext] = newUser;
-    const uid = auth.currentUser.uid;
+  const [newUserContext] = newUser;
+  const uid = auth.currentUser.uid;
 
-    const [guestContext, setGuestContext] = guest;
+  const [guestContext, setGuestContext] = guest;
 
-    useEffect(() => {
-        async function initializeContext() {
-            try {
-                let doc = await siteContext.db
-                    .collection("users")
-                    .doc(uid)
-                    .get();
+  useEffect(() => {
+    async function initializeUser() {
+      try {
+        const docRef = doc(siteContext.db, "users", auth.currentUser.uid);
+        console.log("docRef: ", docRef);
+        const docSnap = await getDoc(docRef);
 
-                if (!doc.exists) {
-                    console.log("No user data found!");
-                } else {
-                    let dataObj = doc.data();
-
-                    // set guestContext for the first time.
-                    setGuestContext({ ...dataObj, id: auth.currentUser.uid }); // . to be removed //
-                }
-            } catch (err) {
-                Alert.alert("There is an error.", err.message);
-            }
-        }
-        initializeContext();
-    }, [newUserContext]);
-
-    useEffect(() => {
-        console.log("Home loading the first time.");
-        if (newUserContext.newUser) {
-            navigation.replace("Select Interests");
+        if (docSnap.exists) {
+          const dataObj = docSnap.data();
+          setGuestContext({ ...dataObj, id: auth.currentUser.uid });
         } else {
-            // do nothing
+          Alert.alert("the doc doesn't exist. this should never happen");
         }
-    }, []);
-    console.log("guest context: ", guestContext);
-    return (
-        <View>
-            <Text>Home</Text>
-            <Text>username: {guestContext.username}</Text>
-            <Text>description: {guestContext.description}</Text>
-        </View>
-    );
+      } catch (err) {
+        Alert.alert("There is an error.", err.message);
+      }
+    }
+    initializeUser();
+  }, [newUserContext]);
+
+  useEffect(() => {
+    console.log("Home loading the first time.");
+    if (newUserContext.newUser) {
+      navigation.replace("Select Interests");
+    } else {
+      // do nothing
+    }
+  }, []);
+  console.log("guest context: ", guestContext);
+  return (
+    <View>
+      <Text>Home</Text>
+      <Text>username: {guestContext.username}</Text>
+      <Text>description: {guestContext.description}</Text>
+    </View>
+  );
 }

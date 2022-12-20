@@ -1,6 +1,8 @@
-import React, { useEffect, useContext } from 'react';
-import { ActivityIndicator, View, Text } from 'react-native';
-import { AppContext } from '../components/appContext';
+import React, { useEffect, useContext } from "react";
+import { ActivityIndicator, View, Text } from "react-native";
+import { AppContext } from "../components/appContext";
+
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function LoadingScreen({ navigation }) {
   const { siteDetails } = useContext(AppContext);
@@ -8,12 +10,12 @@ export default function LoadingScreen({ navigation }) {
   const { auth } = siteContext;
 
   useEffect(() => {
-    if(auth) {
-      auth.onAuthStateChanged((user) => {
+    if (auth) {
+      onAuthStateChanged(auth, (user) => {
         if (user) {
-          navigation.replace('Home');
+          navigation.replace("Home");
         } else {
-          navigation.replace('Sign In');
+          navigation.replace("Sign In");
         }
       });
     }
@@ -22,7 +24,7 @@ export default function LoadingScreen({ navigation }) {
   return (
     <View>
       <ActivityIndicator size="large" />
-      <Text style={{color: "black"}}>loading screen...</Text>
+      <Text style={{ color: "black" }}>loading screen...</Text>
     </View>
   );
 }
